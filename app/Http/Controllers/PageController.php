@@ -28,21 +28,104 @@ class PageController extends Controller
      *
      * Sengaja berupa allowlist tetap, bukan path dari input pengguna, supaya
      * penampil berkas tidak bisa dipakai membaca berkas lain di server.
+     *
+     * Kunci "sorot" berisi potongan teks penanda baris inti. Sengaja memakai
+     * pencocokan teks, bukan nomor baris, supaya sorotan tidak meleset ketika
+     * berkasnya disunting.
      */
     private const BUKTI = [
-        'layout' => 'resources/views/layouts/app.blade.php',
-        'beranda' => 'resources/views/beranda.blade.php',
-        'profil' => 'resources/views/profil.blade.php',
-        'ide' => 'resources/views/ide.blade.php',
-        'laporan' => 'resources/views/laporan.blade.php',
-        'info-card' => 'resources/views/components/info-card.blade.php',
-        'status-banner' => 'resources/views/components/status-banner.blade.php',
-        'teks-inti' => 'resources/views/components/teks-inti.blade.php',
-        'controller' => 'app/Http/Controllers/PageController.php',
-        'rute' => 'routes/web.php',
-        'css' => 'resources/css/app.css',
-        'vite' => 'vite.config.js',
-        'package' => 'package.json',
+        'layout' => [
+            'path' => 'resources/views/layouts/app.blade.php',
+            'inti' => 'Satu-satunya berkas yang memuat kerangka HTML: title dinamis, '
+                . 'navbar, container konten, footer, dan pemuatan aset Vite.',
+            'sorot' => [
+                '<html lang="id"',
+                "@yield('title'",
+                '@vite([',
+                '<header',
+                '<nav',
+                '<main',
+                "@yield('content')",
+                '<footer',
+            ],
+        ],
+        'beranda' => [
+            'path' => 'resources/views/beranda.blade.php',
+            'inti' => 'Halaman anak: mewarisi master layout, memakai kedua komponen kustom, '
+                . 'dan memuat sapaan dinamis Tantangan 2.',
+            'sorot' => ["@extends('layouts.app')", '<x-status-banner', '<x-info-card', '$sapaan'],
+        ],
+        'profil' => [
+            'path' => 'resources/views/profil.blade.php',
+            'inti' => 'Halaman anak yang menyajikan data profil lewat komponen x-info-card.',
+            'sorot' => ["@extends('layouts.app')", '<x-info-card'],
+        ],
+        'ide' => [
+            'path' => 'resources/views/ide.blade.php',
+            'inti' => 'Halaman anak berisi formulir pengumpulan ide beserta notifikasinya.',
+            'sorot' => ["@extends('layouts.app')", '<x-status-banner', '<x-info-card', '@csrf', '<form'],
+        ],
+        'laporan' => [
+            'path' => 'resources/views/laporan.blade.php',
+            'inti' => 'Halaman anak keempat, sekaligus contoh pemakaian komponen x-teks-inti.',
+            'sorot' => ["@extends('layouts.app')", '<x-status-banner', '<x-info-card', '<x-teks-inti'],
+        ],
+        'info-card' => [
+            'path' => 'resources/views/components/info-card.blade.php',
+            'inti' => 'Komponen kustom pertama. Menerima attributes lewat @props dan isi '
+                . 'bebas lewat slot.',
+            'sorot' => ['@props([', '$attributes', '$nilai ?? $slot'],
+        ],
+        'status-banner' => [
+            'path' => 'resources/views/components/status-banner.blade.php',
+            'inti' => 'Komponen kustom kedua. Warna banner ditentukan attribute "tipe", '
+                . 'isi pesan datang dari slot.',
+            'sorot' => ['@props([', '$attributes->merge', '{{ $slot }}', 'match ($tipe)'],
+        ],
+        'teks-inti' => [
+            'path' => 'resources/views/components/teks-inti.blade.php',
+            'inti' => 'Komponen kustom ketiga. Meng-escape teks lebih dulu, baru menebalkan '
+                . 'bagian bertanda.',
+            'sorot' => ['@props([', 'preg_replace(', 'e($teks)', '{!! $aman !!}'],
+        ],
+        'controller' => [
+            'path' => 'app/Http/Controllers/PageController.php',
+            'inti' => 'Satu controller untuk seluruh halaman. Tiap method mengembalikan view, '
+                . 'termasuk pembacaan parameter kedua tantangan.',
+            'sorot' => [
+                'public function beranda',
+                'public function profil',
+                'public function ideAgent',
+                'public function laporan',
+                'public function simpanIde',
+                "request->query('user')",
+                "query('mode') === 'dark'",
+                '$request->validate(',
+                'return view(',
+            ],
+        ],
+        'rute' => [
+            'path' => 'routes/web.php',
+            'inti' => 'Seluruh rute diarahkan ke PageController dan diberi nama.',
+            'sorot' => ['Route::get(', 'Route::post('],
+        ],
+        'css' => [
+            'path' => 'resources/css/app.css',
+            'inti' => 'Sumber Tailwind yang dikompilasi Vite, beserta varian dark berbasis '
+                . 'class untuk Tantangan 1.',
+            'sorot' => ["@import 'tailwindcss'", '@custom-variant dark', '@theme inline', '.dark {'],
+        ],
+        'vite' => [
+            'path' => 'vite.config.js',
+            'inti' => 'Konfigurasi bundler: masukan CSS dan JS, plugin Tailwind, serta font '
+                . 'yang diunduh saat build agar tidak memakai CDN.',
+            'sorot' => ['input: [', 'tailwindcss()', 'bunny(', 'laravel('],
+        ],
+        'package' => [
+            'path' => 'package.json',
+            'inti' => 'Dependensi NPM dan perintah build Vite.',
+            'sorot' => ['"build"', '"dev"', 'tailwindcss', 'vite'],
+        ],
     ];
 
     /**
@@ -242,19 +325,50 @@ class PageController extends Controller
     {
         abort_unless(array_key_exists($kunci, self::BUKTI), 404);
 
-        $relatif = self::BUKTI[$kunci];
+        $info = self::BUKTI[$kunci];
+        $relatif = $info['path'];
         $absolut = base_path($relatif);
 
         abort_unless(is_file($absolut), 404);
 
+        $baris = $this->tandaiBaris(
+            explode("\n", rtrim((string) file_get_contents($absolut), "\n")),
+            $info['sorot']
+        );
+
         return view('berkas', [
             'kunci' => $kunci,
             'berkas' => $relatif,
-            'baris' => explode("\n", rtrim((string) file_get_contents($absolut), "\n")),
+            'inti' => $info['inti'],
+            'baris' => $baris,
+            'jumlahSorot' => count(array_filter($baris, fn (array $b) => $b['sorot'])),
             'tautanGithub' => $this->tautanGithub($relatif),
-            'daftarBukti' => self::BUKTI,
+            'daftarBukti' => array_map(fn (array $b) => $b['path'], self::BUKTI),
             'gelap' => $this->modeGelap($request),
         ]);
+    }
+
+    /**
+     * Menandai baris mana saja yang menjadi inti pemenuhan spesifikasi.
+     *
+     * @param  array<int, string>  $baris
+     * @param  array<int, string>  $penanda
+     * @return array<int, array{nomor: int, isi: string, sorot: bool}>
+     */
+    private function tandaiBaris(array $baris, array $penanda): array
+    {
+        return array_map(function (string $isi, int $i) use ($penanda) {
+            $sorot = false;
+
+            foreach ($penanda as $tanda) {
+                if (str_contains($isi, $tanda)) {
+                    $sorot = true;
+                    break;
+                }
+            }
+
+            return ['nomor' => $i + 1, 'isi' => $isi, 'sorot' => $sorot];
+        }, $baris, array_keys($baris));
     }
 
     /**
@@ -284,8 +398,8 @@ class PageController extends Controller
     {
         return array_map(fn (string $k) => [
             'kunci' => $k,
-            'berkas' => self::BUKTI[$k],
-            'github' => $this->tautanGithub(self::BUKTI[$k]),
+            'berkas' => self::BUKTI[$k]['path'],
+            'github' => $this->tautanGithub(self::BUKTI[$k]['path']),
         ], $kunci);
     }
 

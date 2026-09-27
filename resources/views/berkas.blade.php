@@ -6,7 +6,12 @@
 @section('subheading', 'Isi berkas dibaca langsung dari proyek yang sedang berjalan, sehingga selalu sama dengan kode yang didemokan.')
 
 @section('content')
-    <div class="mb-8 flex flex-wrap items-center gap-3">
+    {{-- Penjelasan inti berkas ini --}}
+    <x-status-banner tipe="sukses" judul="Inti berkas ini" class="mb-8">
+        {{ $inti }}
+    </x-status-banner>
+
+    <div class="mb-6 flex flex-wrap items-center gap-3">
         <a href="{{ route('laporan') }}"
            class="rounded-full border border-line-strong px-5 py-2 text-sm text-ink-soft transition hover:border-accent hover:text-ink">
             Kembali ke Laporan
@@ -17,26 +22,32 @@
                class="rounded-full bg-accent px-5 py-2 text-sm font-medium text-on-accent transition hover:opacity-90">
                 Buka di GitHub
             </a>
-        @else
-            <span class="text-sm text-ink-soft">
-                Isi <code class="font-mono text-xs">TUGAS_REPO_URL</code> di berkas
-                <code class="font-mono text-xs">.env</code> agar tombol GitHub muncul.
-            </span>
         @endif
 
         <span class="font-mono text-xs text-ink-soft">{{ count($baris) }} baris</span>
+
+        {{-- Keterangan penanda sorotan --}}
+        <span class="flex items-center gap-2 font-mono text-xs text-ink-soft">
+            <span class="inline-block h-3 w-1 rounded-sm bg-accent"></span>
+            {{ $jumlahSorot }} baris inti disorot
+        </span>
     </div>
 
-    {{-- Isi berkas dengan nomor baris --}}
+    {{-- Isi berkas. Baris inti diberi garis aksen, latar, dan huruf tebal. --}}
     <div class="overflow-x-auto rounded-2xl border border-line bg-surface">
         <table class="w-full border-collapse font-mono text-[0.78rem] leading-relaxed">
             <tbody>
-                @foreach ($baris as $i => $isi)
-                    <tr class="align-top">
-                        <td class="w-14 shrink-0 select-none border-r border-line px-3 py-0.5 text-right text-ink-soft/70">
-                            {{ $i + 1 }}
+                @foreach ($baris as $b)
+                    <tr class="align-top {{ $b['sorot'] ? 'bg-accent-tint' : '' }}">
+                        <td class="w-14 shrink-0 border-r px-3 py-0.5 text-right select-none
+                                   {{ $b['sorot']
+                                       ? 'border-accent font-semibold text-accent'
+                                       : 'border-line text-ink-soft/70' }}">
+                            {{ $b['nomor'] }}
                         </td>
-                        <td class="px-4 py-0.5 whitespace-pre text-ink">{{ $isi }}</td>
+
+                        <td class="px-4 py-0.5 whitespace-pre
+                                   {{ $b['sorot'] ? 'font-semibold text-ink' : 'text-ink-soft' }}">{{ $b['isi'] }}</td>
                     </tr>
                 @endforeach
             </tbody>
