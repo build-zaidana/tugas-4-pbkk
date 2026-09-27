@@ -28,3 +28,6 @@ Route::get('/ide-agent', [PageController::class, 'ideAgent'])->name('ide.agent')
 
 // Pengiriman formulir pengumpulan ide.
 Route::post('/ide-agent', [PageController::class, 'simpanIde'])->name('ide.simpan');
+
+// Halaman 4: rekap pengerjaan tugas, dipakai saat sesi live demo.
+Route::get('/laporan', [PageController::class, 'laporan'])->name('laporan');

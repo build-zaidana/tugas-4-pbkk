@@ -66,6 +66,23 @@ class PageController extends Controller
     }
 
     /**
+     * Halaman Laporan Pengerjaan.
+     *
+     * Merangkum apa saja yang dibangun untuk Tugas Pertemuan 4, dipakai
+     * sebagai bahan saat sesi live demo.
+     */
+    public function laporan(Request $request)
+    {
+        return view('laporan', [
+            'spesifikasi' => $this->rekapSpesifikasi(),
+            'tantangan' => $this->rekapTantangan(),
+            'berkasBaru' => $this->berkasBaru(),
+            'berkasUbah' => $this->berkasDiubah(),
+            'gelap' => $this->modeGelap($request),
+        ]);
+    }
+
+    /**
      * Memproses formulir pengumpulan ide.
      *
      * Hasilnya dikirim kembali sebagai pesan flash, lalu ditampilkan oleh
@@ -97,6 +114,121 @@ class PageController extends Controller
     private function modeGelap(Request $request): bool
     {
         return $request->query('mode') === 'dark';
+    }
+
+    /**
+     * Rekap pemenuhan spesifikasi teknis wajib.
+     *
+     * @return array<int, array{ketentuan: string, penerapan: string, bukti: string}>
+     */
+    private function rekapSpesifikasi(): array
+    {
+        return [
+            [
+                'ketentuan' => 'Master layout terpusat',
+                'penerapan' => 'layouts/app.blade.php memuat title dinamis, navbar statis, '
+                    . 'container konten, dan footer ITS.',
+                'bukti' => 'resources/views/layouts/app.blade.php',
+            ],
+            [
+                'ketentuan' => 'Tanpa duplikasi struktur HTML',
+                'penerapan' => 'Tidak ada satu pun tag <html>, <head>, atau <body> di berkas '
+                    . 'view selain di master layout. Semua halaman memakai @extends.',
+                'bukti' => '@extends(\'layouts.app\')',
+            ],
+            [
+                'ketentuan' => 'Minimal tiga halaman anak',
+                'penerapan' => 'Beranda, Profil Mahasiswa, dan Ide Riset. Halaman laporan ini '
+                    . 'menjadi halaman keempat.',
+                'bukti' => '/ · /profil-mahasiswa · /ide-agent',
+            ],
+            [
+                'ketentuan' => 'Satu PageController',
+                'penerapan' => 'Enam rute, seluruhnya diarahkan ke PageController.',
+                'bukti' => 'app/Http/Controllers/PageController.php',
+            ],
+            [
+                'ketentuan' => 'Minimal dua komponen kustom',
+                'penerapan' => 'x-info-card untuk data profil dan x-status-banner untuk '
+                    . 'notifikasi form. Keduanya menerima attributes sekaligus slot.',
+                'bukti' => 'resources/views/components/',
+            ],
+            [
+                'ketentuan' => 'Asset bundler Vite via NPM',
+                'penerapan' => 'Tailwind CSS 4 dikompilasi @tailwindcss/vite. Empat font '
+                    . 'diunduh saat build lalu disajikan dari public/build.',
+                'bukti' => 'npm run build',
+            ],
+            [
+                'ketentuan' => 'Tanpa tautan CDN',
+                'penerapan' => 'HTML hasil render tidak memuat satu pun alamat eksternal, '
+                    . 'termasuk untuk font.',
+                'bukti' => 'nol permintaan keluar',
+            ],
+        ];
+    }
+
+    /**
+     * Rekap dua tantangan nilai plus.
+     *
+     * @return array<int, array{nomor: string, judul: string, cara: string, rute: string, tautan: string}>
+     */
+    private function rekapTantangan(): array
+    {
+        return [
+            [
+                'nomor' => 'Tantangan 1',
+                'judul' => 'Toggle tema dinamis',
+                'cara' => 'Controller membaca ?mode=dark menjadi variabel Blade $gelap, lalu '
+                    . 'memasangnya sebagai class "dark" pada elemen root. Token warna '
+                    . 'dipetakan inline di app.css, sehingga satu class membalik seluruh palet.',
+                'rute' => '/ide-agent?mode=dark',
+                'tautan' => route('ide.agent', ['mode' => 'dark']),
+            ],
+            [
+                'nomor' => 'Tantangan 2',
+                'judul' => 'Alert status interaktif',
+                'cara' => 'Parameter ?user= dibaca controller lalu diteruskan ke komponen '
+                    . 'x-status-banner sebagai sapaan. Tanpa parameter, banner berubah '
+                    . 'menjadi petunjuk pemakaian.',
+                'rute' => '/beranda?user=Andi',
+                'tautan' => route('beranda', ['user' => 'Andi']),
+            ],
+        ];
+    }
+
+    /**
+     * Berkas yang dibuat khusus untuk tugas ini.
+     *
+     * @return array<int, array{berkas: string, guna: string}>
+     */
+    private function berkasBaru(): array
+    {
+        return [
+            ['berkas' => 'resources/views/layouts/app.blade.php', 'guna' => 'Master layout'],
+            ['berkas' => 'resources/views/components/info-card.blade.php', 'guna' => 'Komponen kartu data'],
+            ['berkas' => 'resources/views/components/status-banner.blade.php', 'guna' => 'Komponen notifikasi'],
+            ['berkas' => 'resources/views/beranda.blade.php', 'guna' => 'Halaman 1'],
+            ['berkas' => 'resources/views/profil.blade.php', 'guna' => 'Halaman 2'],
+            ['berkas' => 'resources/views/ide.blade.php', 'guna' => 'Halaman 3 dan formulir ide'],
+            ['berkas' => 'resources/views/laporan.blade.php', 'guna' => 'Halaman laporan ini'],
+            ['berkas' => 'README.md', 'guna' => 'Dokumentasi dan cara menjalankan'],
+        ];
+    }
+
+    /**
+     * Berkas bawaan Laravel yang disesuaikan.
+     *
+     * @return array<int, array{berkas: string, guna: string}>
+     */
+    private function berkasDiubah(): array
+    {
+        return [
+            ['berkas' => 'app/Http/Controllers/PageController.php', 'guna' => 'Seluruh logika halaman dan validasi form'],
+            ['berkas' => 'routes/web.php', 'guna' => 'Enam rute bernama'],
+            ['berkas' => 'resources/css/app.css', 'guna' => 'Token warna, varian dark berbasis class, tipografi'],
+            ['berkas' => 'vite.config.js', 'guna' => 'Pendaftaran empat font agar di-self-host'],
+        ];
     }
 
     /**

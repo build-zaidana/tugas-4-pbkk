@@ -38,6 +38,7 @@ Semua rute diarahkan ke satu [`PageController`](app/Http/Controllers/PageControl
 | GET | `/profil-mahasiswa` | `profil.mahasiswa` | Data diri dan riwayat studi |
 | GET | `/ide-agent` | `ide.agent` | Rancangan platform Agentic AI dan formulir ide |
 | POST | `/ide-agent` | `ide.simpan` | Memproses formulir pengumpulan ide |
+| GET | `/laporan` | `laporan` | Rekap pengerjaan tugas, dipakai saat sesi live demo |
 
 ## Pemenuhan Spesifikasi
 

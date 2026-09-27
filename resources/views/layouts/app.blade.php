@@ -20,6 +20,7 @@
         ['rute' => 'beranda', 'label' => 'Beranda'],
         ['rute' => 'profil.mahasiswa', 'label' => 'Profil'],
         ['rute' => 'ide.agent', 'label' => 'Ide Riset'],
+        ['rute' => 'laporan', 'label' => 'Laporan'],
     ];
 @endphp
 
