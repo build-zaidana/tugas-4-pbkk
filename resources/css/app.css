@@ -4,19 +4,91 @@
 @source '../../storage/framework/views/*.php';
 
 /*
-| Varian dark dibuat berbasis class, bukan prefers-color-scheme, supaya mode
-| gelap bisa dikendalikan dari variabel Blade PHP lewat parameter rute
-| /ide-agent?mode=dark (Tantangan 1).
+| Varian dark berbasis class, bukan prefers-color-scheme, supaya mode gelap
+| bisa dikendalikan dari variabel Blade PHP lewat /ide-agent?mode=dark
+| (Tantangan 1).
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/*
+| Token warna mengikuti sistem desain portofolio zaidana.netlify.app.
+| Nilainya didefinisikan dua kali: terang di :root, gelap di .dark. Karena
+| @theme di bawah memetakannya secara inline, satu class "dark" pada elemen
+| root sudah cukup membalik seluruh halaman tanpa perlu varian dark: manual.
+*/
+:root {
+    --paper: #f3f1ec;
+    --surface: #e6e1d7;
+    --raised: #fdfcf9;
+    --ink: #2a2a2a;
+    --ink-soft: #5c5a55;
+    --line: #2a2a2a1f;
+    --line-strong: #2a2a2a38;
+    --accent: #4a5d44;
+    --accent-tint: #e1e7dc;
+    --on-accent: #f3f2ee;
+    --tan: #80512e;
+    --tan-tint: #efe4d8;
+    --danger: #9a3b2c;
+    --danger-tint: #f6e3df;
+    --glass-fill: #fbfaf79e;
+    --glass-edge: #ffffffd9;
+}
+
+.dark {
+    --paper: #161915;
+    --surface: #1f231e;
+    --raised: #292e28;
+    --ink: #eceae4;
+    --ink-soft: #a8a79e;
+    --line: #eceae41a;
+    --line-strong: #eceae433;
+    --accent: #aec2a5;
+    --accent-tint: #222a20;
+    --on-accent: #161915;
+    --tan: #d6bca5;
+    --tan-tint: #2b241e;
+    --danger: #eba08f;
+    --danger-tint: #2e1d1a;
+    --glass-fill: #292e288c;
+    --glass-edge: #eceae424;
+}
+
+@theme inline {
+    --color-paper: var(--paper);
+    --color-surface: var(--surface);
+    --color-raised: var(--raised);
+    --color-ink: var(--ink);
+    --color-ink-soft: var(--ink-soft);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-accent: var(--accent);
+    --color-accent-tint: var(--accent-tint);
+    --color-on-accent: var(--on-accent);
+    --color-tan: var(--tan);
+    --color-tan-tint: var(--tan-tint);
+    --color-danger: var(--danger);
+    --color-danger-tint: var(--danger-tint);
+    --color-glass: var(--glass-fill);
+    --color-glass-edge: var(--glass-edge);
+
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+    --font-hand: 'Caveat', ui-serif, cursive;
 }
 
 @layer base {
     body {
-        transition: background-color 0.2s ease, color 0.2s ease;
+        font-size: 17px;
+        transition: background-color 0.24s ease, color 0.24s ease;
+    }
+
+    /* Judul serif besar dengan tracking rapat, ciri khas portofolio. */
+    .display {
+        font-family: var(--font-serif);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
     }
 }

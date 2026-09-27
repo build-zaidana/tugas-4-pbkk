@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('title', 'Profil Mahasiswa')
+@section('eyebrow', 'Data diri')
 @section('heading', 'Profil Mahasiswa')
-@section('subheading', 'Data diri dan rekam jejak perkuliahan')
+@section('subheading', 'Identitas akademis dan rekam jejak perkuliahan sampai semester berjalan.')
 
 @section('content')
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -14,35 +15,35 @@
         <x-info-card label="Surel" :nilai="$profil['email']" />
     </div>
 
-    <div class="mt-8">
+    <div class="mt-4">
         <x-info-card label="Bidang Minat">
-            <p class="text-base font-normal text-slate-600 dark:text-slate-300">
+            <p class="font-sans text-base leading-relaxed text-ink-soft">
                 {{ $profil['minat'] }}
             </p>
         </x-info-card>
     </div>
 
-    <h2 class="mt-10 mb-3 text-lg font-semibold text-slate-900 dark:text-white">
-        Riwayat Studi
-    </h2>
+    <h2 class="display mt-16 mb-5 text-3xl">Riwayat Studi</h2>
 
-    <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div class="overflow-x-auto rounded-2xl border border-line bg-surface">
         <table class="w-full text-left text-sm">
-            <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
-                <tr>
-                    <th class="px-5 py-3">Semester</th>
-                    <th class="px-5 py-3">Periode</th>
-                    <th class="px-5 py-3 text-right">SKS</th>
-                    <th class="px-5 py-3 text-right">IP</th>
+            <thead class="border-b border-line">
+                <tr class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft">
+                    <th class="px-6 py-4 font-normal">Semester</th>
+                    <th class="px-6 py-4 font-normal">Periode</th>
+                    <th class="px-6 py-4 text-right font-normal">SKS</th>
+                    <th class="px-6 py-4 text-right font-normal">IP</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody class="divide-y divide-line">
                 @foreach ($riwayat as $baris)
-                    <tr>
-                        <td class="px-5 py-3">{{ $baris['semester'] }}</td>
-                        <td class="px-5 py-3">{{ $baris['periode'] }}</td>
-                        <td class="px-5 py-3 text-right tabular-nums">{{ $baris['sks'] }}</td>
-                        <td class="px-5 py-3 text-right tabular-nums">{{ number_format($baris['ip'], 2) }}</td>
+                    <tr class="transition hover:bg-raised">
+                        <td class="px-6 py-4 font-serif text-xl">{{ $baris['semester'] }}</td>
+                        <td class="px-6 py-4 text-ink-soft">{{ $baris['periode'] }}</td>
+                        <td class="px-6 py-4 text-right font-mono tabular-nums">{{ $baris['sks'] }}</td>
+                        <td class="px-6 py-4 text-right font-mono tabular-nums text-accent">
+                            {{ number_format($baris['ip'], 2) }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
