@@ -23,6 +23,27 @@ class PageController extends Controller
     ];
 
     /**
+     * Daftar berkas bukti yang boleh dibuka halaman Laporan.
+     *
+     * Sengaja berupa allowlist tetap, bukan path dari input pengguna, supaya
+     * penampil berkas tidak bisa dipakai membaca berkas lain di server.
+     */
+    private const BUKTI = [
+        'layout' => 'resources/views/layouts/app.blade.php',
+        'beranda' => 'resources/views/beranda.blade.php',
+        'profil' => 'resources/views/profil.blade.php',
+        'ide' => 'resources/views/ide.blade.php',
+        'laporan' => 'resources/views/laporan.blade.php',
+        'info-card' => 'resources/views/components/info-card.blade.php',
+        'status-banner' => 'resources/views/components/status-banner.blade.php',
+        'controller' => 'app/Http/Controllers/PageController.php',
+        'rute' => 'routes/web.php',
+        'css' => 'resources/css/app.css',
+        'vite' => 'vite.config.js',
+        'package' => 'package.json',
+    ];
+
+    /**
      * Halaman Beranda.
      *
      * Tantangan 2: parameter kueri ?user= menghasilkan sapaan dinamis yang
@@ -73,11 +94,18 @@ class PageController extends Controller
      */
     public function laporan(Request $request)
     {
+        $spesifikasi = array_map(function (array $baris) {
+            $baris['bukti'] = $this->petakanBukti($baris['kunci']);
+
+            return $baris;
+        }, $this->rekapSpesifikasi());
+
         return view('laporan', [
-            'spesifikasi' => $this->rekapSpesifikasi(),
+            'spesifikasi' => $spesifikasi,
             'tantangan' => $this->rekapTantangan(),
             'berkasBaru' => $this->berkasBaru(),
             'berkasUbah' => $this->berkasDiubah(),
+            'repo' => config('tugas.repo'),
             'gelap' => $this->modeGelap($request),
         ]);
     }
@@ -119,7 +147,10 @@ class PageController extends Controller
     /**
      * Rekap pemenuhan spesifikasi teknis wajib.
      *
-     * @return array<int, array{ketentuan: string, penerapan: string, bukti: string}>
+     * Tiap butir membawa daftar kunci berkas bukti, yang di halaman Laporan
+     * diubah menjadi tautan ke penampil berkas dan ke GitHub.
+     *
+     * @return array<int, array{ketentuan: string, penerapan: string, kunci: array<int, string>}>
      */
     private function rekapSpesifikasi(): array
     {
@@ -128,44 +159,102 @@ class PageController extends Controller
                 'ketentuan' => 'Master layout terpusat',
                 'penerapan' => 'layouts/app.blade.php memuat title dinamis, navbar statis, '
                     . 'container konten, dan footer ITS.',
-                'bukti' => 'resources/views/layouts/app.blade.php',
+                'kunci' => ['layout'],
             ],
             [
                 'ketentuan' => 'Tanpa duplikasi struktur HTML',
                 'penerapan' => 'Tidak ada satu pun tag <html>, <head>, atau <body> di berkas '
-                    . 'view selain di master layout. Semua halaman memakai @extends.',
-                'bukti' => '@extends(\'layouts.app\')',
+                    . 'view selain di master layout. Semua halaman dibuka dengan '
+                    . '@extends(\'layouts.app\').',
+                'kunci' => ['beranda', 'profil', 'ide', 'laporan'],
             ],
             [
                 'ketentuan' => 'Minimal tiga halaman anak',
                 'penerapan' => 'Beranda, Profil Mahasiswa, dan Ide Riset. Halaman laporan ini '
                     . 'menjadi halaman keempat.',
-                'bukti' => '/ · /profil-mahasiswa · /ide-agent',
+                'kunci' => ['rute'],
             ],
             [
                 'ketentuan' => 'Satu PageController',
-                'penerapan' => 'Enam rute, seluruhnya diarahkan ke PageController.',
-                'bukti' => 'app/Http/Controllers/PageController.php',
+                'penerapan' => 'Tujuh rute, seluruhnya diarahkan ke PageController.',
+                'kunci' => ['controller', 'rute'],
             ],
             [
                 'ketentuan' => 'Minimal dua komponen kustom',
                 'penerapan' => 'x-info-card untuk data profil dan x-status-banner untuk '
                     . 'notifikasi form. Keduanya menerima attributes sekaligus slot.',
-                'bukti' => 'resources/views/components/',
+                'kunci' => ['info-card', 'status-banner'],
             ],
             [
                 'ketentuan' => 'Asset bundler Vite via NPM',
                 'penerapan' => 'Tailwind CSS 4 dikompilasi @tailwindcss/vite. Empat font '
                     . 'diunduh saat build lalu disajikan dari public/build.',
-                'bukti' => 'npm run build',
+                'kunci' => ['vite', 'package', 'css'],
             ],
             [
                 'ketentuan' => 'Tanpa tautan CDN',
-                'penerapan' => 'HTML hasil render tidak memuat satu pun alamat eksternal, '
-                    . 'termasuk untuk font.',
-                'bukti' => 'nol permintaan keluar',
+                'penerapan' => 'HTML hasil render tidak memuat satu pun alamat eksternal. '
+                    . 'Font pun diunduh saat build, bukan dipanggil dari CDN.',
+                'kunci' => ['layout', 'vite'],
             ],
         ];
+    }
+
+    /**
+     * Menampilkan isi satu berkas bukti.
+     *
+     * Kunci divalidasi terhadap allowlist BUKTI, sehingga path dari URL tidak
+     * pernah dipakai langsung untuk membaca berkas.
+     */
+    public function berkas(Request $request, string $kunci)
+    {
+        abort_unless(array_key_exists($kunci, self::BUKTI), 404);
+
+        $relatif = self::BUKTI[$kunci];
+        $absolut = base_path($relatif);
+
+        abort_unless(is_file($absolut), 404);
+
+        return view('berkas', [
+            'kunci' => $kunci,
+            'berkas' => $relatif,
+            'baris' => explode("\n", rtrim((string) file_get_contents($absolut), "\n")),
+            'tautanGithub' => $this->tautanGithub($relatif),
+            'daftarBukti' => self::BUKTI,
+            'gelap' => $this->modeGelap($request),
+        ]);
+    }
+
+    /**
+     * Menyusun tautan ke berkas di GitHub.
+     *
+     * Mengembalikan null bila TUGAS_REPO_URL belum diisi, supaya halaman tetap
+     * berfungsi sebelum repositori dibuat.
+     */
+    private function tautanGithub(string $relatif): ?string
+    {
+        $repo = config('tugas.repo');
+
+        if (! is_string($repo) || $repo === '') {
+            return null;
+        }
+
+        return rtrim($repo, '/') . '/blob/' . config('tugas.branch') . '/' . $relatif;
+    }
+
+    /**
+     * Memasangkan tiap kunci bukti dengan path dan tautannya.
+     *
+     * @param  array<int, string>  $kunci
+     * @return array<int, array{kunci: string, berkas: string, github: string|null}>
+     */
+    private function petakanBukti(array $kunci): array
+    {
+        return array_map(fn (string $k) => [
+            'kunci' => $k,
+            'berkas' => self::BUKTI[$k],
+            'github' => $this->tautanGithub(self::BUKTI[$k]),
+        ], $kunci);
     }
 
     /**

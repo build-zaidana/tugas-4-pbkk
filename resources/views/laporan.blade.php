@@ -6,10 +6,23 @@
 @section('subheading', 'Rekap pemenuhan spesifikasi, kedua tantangan nilai plus, serta berkas yang dibuat dan disesuaikan.')
 
 @section('content')
-    <x-status-banner tipe="sukses" judul="Seluruh spesifikasi wajib terpenuhi." class="mb-12">
-        Ditambah kedua tantangan nilai plus. Setiap butir di bawah dapat dibuka langsung
-        untuk diperiksa saat demo.
+    <x-status-banner tipe="sukses" judul="Seluruh spesifikasi wajib terpenuhi." class="mb-6">
+        Ditambah kedua tantangan nilai plus. Tiap butir di bawah tertaut ke berkas buktinya,
+        yang isinya dibaca langsung dari proyek yang sedang berjalan.
     </x-status-banner>
+
+    @unless ($repo)
+        <x-status-banner tipe="peringatan" judul="Tautan GitHub belum aktif." class="mb-12">
+            Isi <code class="font-mono text-xs">TUGAS_REPO_URL</code> pada berkas
+            <code class="font-mono text-xs">.env</code> dengan alamat repositori, maka tiap
+            bukti akan memperoleh tombol tambahan menuju berkasnya di GitHub.
+        </x-status-banner>
+    @else
+        <p class="mb-12 text-sm text-ink-soft">
+            Repositori:
+            <a href="{{ $repo }}" target="_blank" rel="noopener" class="font-mono text-xs text-accent underline-offset-4 hover:underline">{{ $repo }}</a>
+        </p>
+    @endunless
 
     {{-- Ringkasan angka --}}
     <div class="mb-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,7 +46,26 @@
 
                 <div class="sm:flex-1">
                     <p class="text-sm leading-relaxed text-ink-soft">{{ $baris['penerapan'] }}</p>
-                    <p class="mt-2 font-mono text-xs text-accent">{{ $baris['bukti'] }}</p>
+
+                    {{-- Tiap butir ditautkan ke berkas buktinya --}}
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @foreach ($baris['bukti'] as $bukti)
+                            <a href="{{ route('laporan.berkas', $bukti['kunci']) }}"
+                               class="rounded-full border border-line-strong px-3 py-1 font-mono text-[0.7rem]
+                                      text-ink-soft transition hover:border-accent hover:text-ink"
+                               title="Lihat isi {{ $bukti['berkas'] }}">
+                                {{ $bukti['berkas'] }}
+                            </a>
+
+                            @if ($bukti['github'])
+                                <a href="{{ $bukti['github'] }}" target="_blank" rel="noopener"
+                                   class="rounded-full border border-accent/50 px-3 py-1 font-mono text-[0.7rem]
+                                          text-accent transition hover:bg-accent hover:text-on-accent">
+                                    GitHub
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
                 </div>
             </div>
         @endforeach

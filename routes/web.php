@@ -31,3 +31,9 @@ Route::post('/ide-agent', [PageController::class, 'simpanIde'])->name('ide.simpa
 
 // Halaman 4: rekap pengerjaan tugas, dipakai saat sesi live demo.
 Route::get('/laporan', [PageController::class, 'laporan'])->name('laporan');
+
+// Penampil berkas bukti. Kuncinya dibatasi allowlist di controller, sehingga
+// rute ini tidak bisa dipakai membaca berkas sembarangan.
+Route::get('/laporan/berkas/{kunci}', [PageController::class, 'berkas'])
+    ->where('kunci', '[a-z-]+')
+    ->name('laporan.berkas');

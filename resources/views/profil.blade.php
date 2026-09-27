@@ -6,6 +6,31 @@
 @section('subheading', 'Identitas akademis dan rekam jejak perkuliahan sampai semester berjalan.')
 
 @section('content')
+    {{-- Kartu identitas dengan pasfoto --}}
+    <div class="mb-10 flex flex-col gap-7 rounded-2xl border border-line bg-surface p-7 sm:flex-row sm:items-center">
+        <img src="{{ asset('images/profil.jpg') }}"
+             alt="Pasfoto {{ $profil['nama'] }}"
+             width="640" height="640" loading="lazy"
+             class="h-36 w-36 shrink-0 rounded-2xl object-cover ring-1 ring-line-strong">
+
+        <div>
+            <p class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft">
+                Kartu Tanda Mahasiswa
+            </p>
+
+            <p class="mt-2 font-serif text-4xl leading-tight tracking-tight text-ink">
+                {{ $profil['nama'] }}
+            </p>
+
+            <p class="mt-2 font-mono text-sm text-accent">{{ $profil['nrp'] }}</p>
+
+            <p class="mt-3 max-w-[48ch] text-sm leading-relaxed text-ink-soft">
+                {{ $profil['prodi'] }} &middot; Angkatan {{ $profil['angkatan'] }} &middot;
+                Semester {{ $profil['semester'] }}
+            </p>
+        </div>
+    </div>
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <x-info-card label="Nama Lengkap" :nilai="$profil['nama']" sorot />
         <x-info-card label="NRP" :nilai="$profil['nrp']" />
