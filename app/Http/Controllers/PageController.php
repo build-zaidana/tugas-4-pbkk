@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Seluruh halaman portal ditangani satu controller, sesuai ketentuan tugas.
@@ -36,6 +37,7 @@ class PageController extends Controller
         'laporan' => 'resources/views/laporan.blade.php',
         'info-card' => 'resources/views/components/info-card.blade.php',
         'status-banner' => 'resources/views/components/status-banner.blade.php',
+        'teks-inti' => 'resources/views/components/teks-inti.blade.php',
         'controller' => 'app/Http/Controllers/PageController.php',
         'rute' => 'routes/web.php',
         'css' => 'resources/css/app.css',
@@ -106,8 +108,37 @@ class PageController extends Controller
             'berkasBaru' => $this->berkasBaru(),
             'berkasUbah' => $this->berkasDiubah(),
             'repo' => config('tugas.repo'),
+            'jumlahKomponen' => $this->jumlahKomponen(),
+            'jumlahRute' => $this->jumlahRute(),
             'gelap' => $this->modeGelap($request),
         ]);
+    }
+
+    /**
+     * Menghitung komponen Blade kustom yang tersedia.
+     *
+     * Dihitung dari berkas nyata, bukan angka tetap, supaya rekap di halaman
+     * Laporan tidak pernah basi ketika komponen ditambah.
+     */
+    private function jumlahKomponen(): int
+    {
+        return count(glob(resource_path('views/components/*.blade.php')) ?: []);
+    }
+
+    /**
+     * Menghitung rute yang ditangani PageController.
+     */
+    private function jumlahRute(): int
+    {
+        $jumlah = 0;
+
+        foreach (Route::getRoutes() as $rute) {
+            if (str_contains((string) $rute->getActionName(), 'PageController')) {
+                $jumlah++;
+            }
+        }
+
+        return $jumlah;
     }
 
     /**
@@ -157,44 +188,45 @@ class PageController extends Controller
         return [
             [
                 'ketentuan' => 'Master layout terpusat',
-                'penerapan' => 'layouts/app.blade.php memuat title dinamis, navbar statis, '
-                    . 'container konten, dan footer ITS.',
+                'penerapan' => '**layouts/app.blade.php** memuat **title dinamis**, **navbar statis**, '
+                    . '**container konten**, dan **footer ITS**.',
                 'kunci' => ['layout'],
             ],
             [
                 'ketentuan' => 'Tanpa duplikasi struktur HTML',
-                'penerapan' => 'Tidak ada satu pun tag <html>, <head>, atau <body> di berkas '
+                'penerapan' => '**Tidak ada satu pun tag <html>, <head>, atau <body>** di berkas '
                     . 'view selain di master layout. Semua halaman dibuka dengan '
-                    . '@extends(\'layouts.app\').',
+                    . '**@extends(\'layouts.app\')**.',
                 'kunci' => ['beranda', 'profil', 'ide', 'laporan'],
             ],
             [
                 'ketentuan' => 'Minimal tiga halaman anak',
-                'penerapan' => 'Beranda, Profil Mahasiswa, dan Ide Riset. Halaman laporan ini '
-                    . 'menjadi halaman keempat.',
+                'penerapan' => '**Beranda**, **Profil Mahasiswa**, dan **Ide Riset**. Halaman laporan '
+                    . 'ini menjadi halaman keempat.',
                 'kunci' => ['rute'],
             ],
             [
                 'ketentuan' => 'Satu PageController',
-                'penerapan' => 'Tujuh rute, seluruhnya diarahkan ke PageController.',
+                'penerapan' => 'Tujuh rute, **seluruhnya diarahkan ke satu PageController**.',
                 'kunci' => ['controller', 'rute'],
             ],
             [
                 'ketentuan' => 'Minimal dua komponen kustom',
-                'penerapan' => 'x-info-card untuk data profil dan x-status-banner untuk '
-                    . 'notifikasi form. Keduanya menerima attributes sekaligus slot.',
-                'kunci' => ['info-card', 'status-banner'],
+                'penerapan' => 'Tersedia tiga: **x-info-card** untuk data profil, '
+                    . '**x-status-banner** untuk notifikasi form, dan **x-teks-inti** untuk '
+                    . 'menyorot bagian penting. Semuanya menerima **attributes sekaligus slot**.',
+                'kunci' => ['info-card', 'status-banner', 'teks-inti'],
             ],
             [
                 'ketentuan' => 'Asset bundler Vite via NPM',
-                'penerapan' => 'Tailwind CSS 4 dikompilasi @tailwindcss/vite. Empat font '
+                'penerapan' => '**Tailwind CSS 4 dikompilasi Vite lewat NPM**. Empat font '
                     . 'diunduh saat build lalu disajikan dari public/build.',
                 'kunci' => ['vite', 'package', 'css'],
             ],
             [
                 'ketentuan' => 'Tanpa tautan CDN',
-                'penerapan' => 'HTML hasil render tidak memuat satu pun alamat eksternal. '
-                    . 'Font pun diunduh saat build, bukan dipanggil dari CDN.',
+                'penerapan' => 'HTML hasil render **tidak memuat satu pun alamat eksternal**. '
+                    . '**Font pun di-self-host**, bukan dipanggil dari CDN.',
                 'kunci' => ['layout', 'vite'],
             ],
         ];
@@ -268,18 +300,18 @@ class PageController extends Controller
             [
                 'nomor' => 'Tantangan 1',
                 'judul' => 'Toggle tema dinamis',
-                'cara' => 'Controller membaca ?mode=dark menjadi variabel Blade $gelap, lalu '
-                    . 'memasangnya sebagai class "dark" pada elemen root. Token warna '
-                    . 'dipetakan inline di app.css, sehingga satu class membalik seluruh palet.',
+                'cara' => 'Controller membaca **?mode=dark** menjadi **variabel Blade $gelap**, lalu '
+                    . 'memasangnya sebagai **class "dark" pada elemen root**. Token warna '
+                    . 'dipetakan inline di app.css, sehingga **satu class membalik seluruh palet**.',
                 'rute' => '/ide-agent?mode=dark',
                 'tautan' => route('ide.agent', ['mode' => 'dark']),
             ],
             [
                 'nomor' => 'Tantangan 2',
                 'judul' => 'Alert status interaktif',
-                'cara' => 'Parameter ?user= dibaca controller lalu diteruskan ke komponen '
-                    . 'x-status-banner sebagai sapaan. Tanpa parameter, banner berubah '
-                    . 'menjadi petunjuk pemakaian.',
+                'cara' => 'Parameter **?user=** dibaca controller lalu diteruskan ke komponen '
+                    . '**x-status-banner** sebagai **sapaan dinamis**. Tanpa parameter, banner '
+                    . 'berubah menjadi petunjuk pemakaian.',
                 'rute' => '/beranda?user=Andi',
                 'tautan' => route('beranda', ['user' => 'Andi']),
             ],

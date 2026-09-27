@@ -27,8 +27,8 @@
     {{-- Ringkasan angka --}}
     <div class="mb-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-info-card label="Halaman" nilai="4" catatan="Tiga wajib, satu tambahan" sorot />
-        <x-info-card label="Komponen Kustom" nilai="2" catatan="Attributes sekaligus slot" />
-        <x-info-card label="Rute Terdaftar" nilai="6" catatan="Semua ke satu controller" />
+        <x-info-card label="Komponen Kustom" :nilai="$jumlahKomponen" catatan="Attributes sekaligus slot" />
+        <x-info-card label="Rute Terdaftar" :nilai="$jumlahRute" catatan="Semua ke satu controller" />
         <x-info-card label="Tautan CDN" nilai="0" catatan="Font ikut di-self-host" />
     </div>
 
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="sm:flex-1">
-                    <p class="text-sm leading-relaxed text-ink-soft">{{ $baris['penerapan'] }}</p>
+                    <x-teks-inti :teks="$baris['penerapan']" class="block text-sm leading-relaxed text-ink-soft" />
 
                     {{-- Tiap butir ditautkan ke berkas buktinya --}}
                     <div class="mt-3 flex flex-wrap gap-2">
@@ -85,7 +85,7 @@
                     {{ $item['judul'] }}
                 </p>
 
-                <p class="mt-3 text-sm leading-relaxed text-ink-soft">{{ $item['cara'] }}</p>
+                <x-teks-inti :teks="$item['cara']" class="mt-3 block text-sm leading-relaxed text-ink-soft" />
 
                 <a href="{{ $item['tautan'] }}"
                    class="mt-5 inline-block rounded-full border border-accent/50 px-5 py-2

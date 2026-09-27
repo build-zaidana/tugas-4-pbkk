@@ -33,6 +33,8 @@
     --danger-tint: #f6e3df;
     --glass-fill: #fbfaf79e;
     --glass-edge: #ffffffd9;
+    --tape: #1c1c1a;
+    --on-tape: #f1efe9;
 }
 
 .dark {
@@ -52,6 +54,8 @@
     --danger-tint: #2e1d1a;
     --glass-fill: #292e288c;
     --glass-edge: #eceae424;
+    --tape: #eceae4;
+    --on-tape: #161915;
 }
 
 @theme inline {
@@ -71,6 +75,8 @@
     --color-danger-tint: var(--danger-tint);
     --color-glass: var(--glass-fill);
     --color-glass-edge: var(--glass-edge);
+    --color-tape: var(--tape);
+    --color-on-tape: var(--on-tape);
 
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;

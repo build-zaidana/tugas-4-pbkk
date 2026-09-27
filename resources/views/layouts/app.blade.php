@@ -72,19 +72,24 @@
 
         {{-- Container konten --}}
         <main class="mx-auto max-w-6xl px-5 pt-10 pb-20 sm:px-8">
-            <div class="mb-10">
-                @hasSection('eyebrow')
-                    <p class="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
-                        @yield('eyebrow')
-                    </p>
-                @endif
+            {{-- Halaman boleh mengganti kepala bawaan dengan hero sendiri. --}}
+            @hasSection('hero')
+                @yield('hero')
+            @else
+                <div class="mb-10">
+                    @hasSection('eyebrow')
+                        <p class="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-ink-soft">
+                            @yield('eyebrow')
+                        </p>
+                    @endif
 
-                <h1 class="display text-5xl sm:text-6xl">@yield('heading', 'Beranda')</h1>
+                    <h1 class="display text-5xl sm:text-6xl">@yield('heading', 'Beranda')</h1>
 
-                @hasSection('subheading')
-                    <p class="mt-4 max-w-[60ch] text-ink-soft">@yield('subheading')</p>
-                @endif
-            </div>
+                    @hasSection('subheading')
+                        <p class="mt-4 max-w-[60ch] text-ink-soft">@yield('subheading')</p>
+                    @endif
+                </div>
+            @endif
 
             @yield('content')
         </main>
