@@ -16,11 +16,20 @@
         ? request()->fullUrlWithoutQuery('mode')
         : request()->fullUrlWithQuery(['mode' => 'dark']);
 
+    // Menu utama dan menu lanjutan, dipisah garis tipis di navbar.
     $menu = [
         ['rute' => 'beranda', 'label' => 'Beranda'],
         ['rute' => 'profil.mahasiswa', 'label' => 'Profil'],
         ['rute' => 'ide.agent', 'label' => 'Ide Riset'],
         ['rute' => 'laporan', 'label' => 'Laporan'],
+    ];
+
+    $menuLanjutan = [
+        ['rute' => 'riwayat', 'label' => 'Riwayat', 'param' => []],
+        ['rute' => 'kalkulator.ip', 'label' => 'Kalkulator IP', 'param' => ['ip1' => '3.80', 'ip2' => '3.74']],
+        ['rute' => 'kalkulator.dinamis', 'label' => 'Kalkulator', 'param' => ['angka1' => 10, 'angka2' => 5, 'operasi' => 'kali']],
+        ['rute' => 'tentang', 'label' => 'Departemen', 'param' => []],
+        ['rute' => 'tugas.akhir', 'label' => 'Tugas Akhir', 'param' => []],
     ];
 @endphp
 
@@ -47,10 +56,22 @@
 
                 <nav class="order-3 w-full rounded-full border border-glass-edge bg-glass px-2 py-1.5
                             backdrop-blur-md sm:order-2 sm:w-auto">
-                    <div class="flex items-center justify-center gap-1">
+                    <div class="flex flex-wrap items-center justify-center gap-1">
                         @foreach ($menu as $item)
                             <a href="{{ route($item['rute']) }}"
                                class="rounded-full px-4 py-1.5 text-sm transition
+                                      {{ request()->routeIs($item['rute'])
+                                          ? 'bg-accent text-on-accent'
+                                          : 'text-ink-soft hover:text-ink' }}">
+                                {{ $item['label'] }}
+                            </a>
+                        @endforeach
+
+                        <span class="mx-1 h-4 w-px bg-line-strong"></span>
+
+                        @foreach ($menuLanjutan as $item)
+                            <a href="{{ route($item['rute'], $item['param']) }}"
+                               class="rounded-full px-3 py-1.5 text-sm transition
                                       {{ request()->routeIs($item['rute'])
                                           ? 'bg-accent text-on-accent'
                                           : 'text-ink-soft hover:text-ink' }}">

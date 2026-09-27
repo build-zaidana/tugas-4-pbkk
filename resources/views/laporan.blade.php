@@ -26,7 +26,7 @@
 
     {{-- Ringkasan angka --}}
     <div class="mb-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <x-info-card label="Halaman" nilai="4" catatan="Tiga wajib, satu tambahan" sorot />
+        <x-info-card label="Halaman" :nilai="$jumlahHalaman" catatan="Semua mewarisi satu layout" sorot />
         <x-info-card label="Komponen Kustom" :nilai="$jumlahKomponen" catatan="Attributes sekaligus slot" />
         <x-info-card label="Rute Terdaftar" :nilai="$jumlahRute" catatan="Semua ke satu controller" />
         <x-info-card label="Tautan CDN" nilai="0" catatan="Font ikut di-self-host" />

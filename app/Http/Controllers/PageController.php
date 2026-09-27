@@ -191,10 +191,21 @@ class PageController extends Controller
             'berkasBaru' => $this->berkasBaru(),
             'berkasUbah' => $this->berkasDiubah(),
             'repo' => config('tugas.repo'),
+            'jumlahHalaman' => $this->jumlahHalaman(),
             'jumlahKomponen' => $this->jumlahKomponen(),
             'jumlahRute' => $this->jumlahRute(),
             'gelap' => $this->modeGelap($request),
         ]);
+    }
+
+    /**
+     * Menghitung halaman, yaitu view di akar resources/views.
+     *
+     * Layout dan komponen tidak ikut terhitung karena berada di subfolder.
+     */
+    private function jumlahHalaman(): int
+    {
+        return count(glob(resource_path('views/*.blade.php')) ?: []);
     }
 
     /**
@@ -222,6 +233,99 @@ class PageController extends Controller
         }
 
         return $jumlah;
+    }
+
+    /**
+     * Halaman Riwayat Studi.
+     */
+    public function riwayat(Request $request)
+    {
+        $riwayat = $this->riwayatStudi();
+
+        return view('riwayat', [
+            'riwayat' => $riwayat,
+            'totalSks' => array_sum(array_column($riwayat, 'sks')),
+            'ipk' => $this->hitungIpkKumulatif(),
+            'gelap' => $this->modeGelap($request),
+        ]);
+    }
+
+    /**
+     * Halaman Tentang Departemen.
+     */
+    public function tentang(Request $request)
+    {
+        return view('tentang', ['gelap' => $this->modeGelap($request)]);
+    }
+
+    /**
+     * Halaman Rencana Tugas Akhir.
+     */
+    public function tugasAkhir(Request $request)
+    {
+        return view('tugas-akhir', ['gelap' => $this->modeGelap($request)]);
+    }
+
+    /**
+     * Kalkulator portofolio akademis: jumlah dan rata-rata IP dua semester.
+     */
+    public function kalkulatorIp(Request $request, string $ip1, string $ip2)
+    {
+        $jumlah = $ip1 + $ip2;
+
+        return view('kalkulator-ip', [
+            'ip1' => $ip1,
+            'ip2' => $ip2,
+            'jumlah' => $jumlah,
+            'rata' => $jumlah / 2,
+            'gelap' => $this->modeGelap($request),
+        ]);
+    }
+
+    /**
+     * Kalkulator dinamis tiga parameter.
+     */
+    public function kalkulator(Request $request, int $angka1, int $angka2, string $operasi)
+    {
+        $hasil = match ($operasi) {
+            'tambah' => $angka1 + $angka2,
+            'kurang' => $angka1 - $angka2,
+            'kali' => $angka1 * $angka2,
+            'bagi' => $angka2 === 0
+                ? 'Galat: pembagian dengan nol'
+                : $angka1 / $angka2,
+            default => 'Galat: operasi tidak dikenali',
+        };
+
+        return view('kalkulator', [
+            'angka1' => $angka1,
+            'angka2' => $angka2,
+            'operasi' => $operasi,
+            'hasil' => $hasil,
+            'sah' => ! is_string($hasil),
+            'gelap' => $this->modeGelap($request),
+        ]);
+    }
+
+    /**
+     * Menghitung IPK kumulatif dengan pembobotan jumlah SKS tiap semester.
+     */
+    private function hitungIpkKumulatif(): float
+    {
+        $riwayat = $this->riwayatStudi();
+        $totalSks = array_sum(array_column($riwayat, 'sks'));
+
+        if ($totalSks === 0) {
+            return 0.0;
+        }
+
+        $totalMutu = array_reduce(
+            $riwayat,
+            fn (float $mutu, array $semester) => $mutu + ($semester['ip'] * $semester['sks']),
+            0.0
+        );
+
+        return round($totalMutu / $totalSks, 2);
     }
 
     /**
@@ -284,8 +388,10 @@ class PageController extends Controller
             ],
             [
                 'ketentuan' => 'Minimal tiga halaman anak',
-                'penerapan' => '**Beranda**, **Profil Mahasiswa**, dan **Ide Riset**. Halaman laporan '
-                    . 'ini menjadi halaman keempat.',
+                'penerapan' => 'Tiga halaman wajib **Beranda**, **Profil Mahasiswa**, dan '
+                    . '**Ide Riset**, ditambah Laporan, Riwayat Studi, Kalkulator IP, '
+                    . 'Kalkulator Dinamis, Tentang Departemen, dan Rencana Tugas Akhir. '
+                    . '**Semuanya mewarisi master layout yang sama**.',
                 'kunci' => ['rute'],
             ],
             [

@@ -32,6 +32,32 @@ Route::post('/ide-agent', [PageController::class, 'simpanIde'])->name('ide.simpa
 // Halaman 4: rekap pengerjaan tugas, dipakai saat sesi live demo.
 Route::get('/laporan', [PageController::class, 'laporan'])->name('laporan');
 
+/*
+|--------------------------------------------------------------------------
+| Halaman lanjutan yang dipertahankan dari Pertemuan 2
+|--------------------------------------------------------------------------
+| Isinya tetap, hanya tampilannya mengikuti master layout dan komponen baru.
+*/
+
+Route::get('/riwayat-studi', [PageController::class, 'riwayat'])->name('riwayat');
+
+Route::get('/tentang-departemen', [PageController::class, 'tentang'])->name('tentang');
+
+Route::get('/rencana-tugas-akhir', [PageController::class, 'tugasAkhir'])->name('tugas.akhir');
+
+// Kalkulator IP: parameter dibatasi rentang nilai yang sah, 0 sampai 4.00.
+Route::get('/kalkulator-ip/{ip1}/{ip2}', [PageController::class, 'kalkulatorIp'])
+    ->where([
+        'ip1' => '([0-3](\.[0-9]{1,2})?|4(\.0{1,2})?)',
+        'ip2' => '([0-3](\.[0-9]{1,2})?|4(\.0{1,2})?)',
+    ])
+    ->name('kalkulator.ip');
+
+// Kalkulator dinamis tiga parameter.
+Route::get('/kalkulator/{angka1}/{angka2}/{operasi}', [PageController::class, 'kalkulator'])
+    ->where(['angka1' => '[0-9]+', 'angka2' => '[0-9]+'])
+    ->name('kalkulator.dinamis');
+
 // Penampil berkas bukti. Kuncinya dibatasi allowlist di controller, sehingga
 // rute ini tidak bisa dipakai membaca berkas sembarangan.
 Route::get('/laporan/berkas/{kunci}', [PageController::class, 'berkas'])
